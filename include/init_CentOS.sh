@@ -27,8 +27,9 @@ alias grep='grep --color'
 alias egrep='egrep --color'
 alias fgrep='fgrep --color'
 EOF
+[[ "$(lsb_release -is)" =~ ^EulerOS$ ]] && sed -i '/HISTTIMEFORMAT=/d' /etc/profile.d/oneinstack.sh
 
-[ -z "$(grep ^'PROMPT_COMMAND=' /etc/bashrc)" ] && cat >> /etc/bashrc << EOF
+[[ ! "$(lsb_release -is)" =~ ^EulerOS$ ]] && [ -z "$(grep ^'PROMPT_COMMAND=' /etc/bashrc)" ] && cat >> /etc/bashrc << EOF
 PROMPT_COMMAND='{ msg=\$(history 1 | { read x y; echo \$y; });logger "[euid=\$(whoami)]":\$(who am i):[\`pwd\`]"\$msg"; }'
 EOF
 
@@ -101,13 +102,17 @@ if [ "${CentOS_ver}" == '6' ]; then
   sed -i 's@^ACTIVE_CONSOLES.*@ACTIVE_CONSOLES=/dev/tty[1-2]@' /etc/sysconfig/init
   sed -i 's@^start@#start@' /etc/init/control-alt-delete.conf
   sed -i 's@LANG=.*$@LANG="en_US.UTF-8"@g' /etc/sysconfig/i18n
-elif [ "${CentOS_ver}" == '7' ]; then
+elif [ ${CentOS_ver} -ge 7 >/dev/null 2>&1 ]; then 
   sed -i 's@LANG=.*$@LANG="en_US.UTF-8"@g' /etc/locale.conf
 fi
 
+[ "${CentOS_ver}" == '8' ] && dnf --enablerepo=PowerTools install -y rpcgen
+
 # Update time
-ntpdate -u pool.ntp.org
-[ ! -e "/var/spool/cron/root" -o -z "$(grep 'ntpdate' /var/spool/cron/root)" ] && { echo "*/20 * * * * $(which ntpdate) -u pool.ntp.org > /dev/null 2>&1" >> /var/spool/cron/root;chmod 600 /var/spool/cron/root; }
+if [ -e "$(which ntpdate)" ]; then
+  ntpdate -u pool.ntp.org
+  [ ! -e "/var/spool/cron/root" -o -z "$(grep 'ntpdate' /var/spool/cron/root)" ] && { echo "*/20 * * * * $(which ntpdate) -u pool.ntp.org > /dev/null 2>&1" >> /var/spool/cron/root;chmod 600 /var/spool/cron/root; }
+fi
 
 # iptables
 if [ "${iptables_flag}" == 'y' ]; then

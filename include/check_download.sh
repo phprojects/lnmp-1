@@ -17,7 +17,7 @@ checkDownload() {
   fi
 
   # General system utils
-  if [[ ${tomcat_option} =~ ^[1-4]$ ]] || [[ ${apache_option} =~ ^[1-2]$ ]] || [[ ${php_option} =~ ^[1-8]$ ]]; then
+  if [[ ${tomcat_option} =~ ^[1-4]$ ]] || [[ ${apache_option} =~ ^[1-2]$ ]] || [[ ${php_option} =~ ^[1-9]$ ]]; then
     echo "Download openSSL..."
     src_url=https://www.openssl.org/source/openssl-${openssl_ver}.tar.gz && Download_src
     echo "Download cacert.pem..."
@@ -122,6 +122,7 @@ checkDownload() {
   if [[ "${db_option}" =~ ^[1-9]$|^1[0-5]$ ]]; then
     if [[ "${db_option}" =~ ^[1,2,5,6,7,9]$|^10$ ]] && [ "${dbinstallmethod}" == "2" ]; then
       [[ "${db_option}" =~ ^[2,5,6,7]$|^10$ ]] && boost_ver=${boost_oldver}
+      [[ "${db_option}" =~ ^9$ ]] && boost_ver=${boost_percona_ver}
       echo "Download boost..."
       [ "${IPADDR_COUNTRY}"x == "CN"x ] && DOWN_ADDR_BOOST=${mirrorLink} || DOWN_ADDR_BOOST=http://downloads.sourceforge.net/project/boost/boost/${boost_ver}
       boostVersion2=$(echo ${boost_ver} | awk -F. '{print $1"_"$2"_"$3}')
@@ -619,7 +620,7 @@ checkDownload() {
   fi
 
   # PHP
-  if [[ "${php_option}" =~ ^[1-8]$ ]]; then
+  if [[ "${php_option}" =~ ^[1-9]$ ]]; then
     echo "PHP common..."
     src_url=http://ftp.gnu.org/pub/gnu/libiconv/libiconv-${libiconv_ver}.tar.gz && Download_src
     src_url=${mirrorLink}/libiconv-glibc-2.16.patch && Download_src
@@ -665,6 +666,11 @@ checkDownload() {
       src_url=http://mirrors.linuxeye.com/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
       src_url=http://mirrors.linuxeye.com/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
       ;;
+    9)
+      src_url=https://secure.php.net/distributions/php-${php74_ver}.tar.gz && Download_src
+      src_url=http://mirrors.linuxeye.com/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
+      src_url=http://mirrors.linuxeye.com/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
+      ;;
   esac
 
   # PHP OPCache
@@ -684,7 +690,7 @@ checkDownload() {
       fi
       ;;
     3)
-      # php 5.3 5.4 5.5 5.6 7.0 7.1 7.2
+      # php 5.3 ~ 7.4
       echo "Download apcu..."
       if [[ "${php_option}" =~ ^[1-4]$ ]]; then
         src_url=https://pecl.php.net/get/apcu-${apcu_oldver}.tgz && Download_src
@@ -729,11 +735,7 @@ checkDownload() {
   # ioncube
   if [ "${pecl_ioncube}" == '1' ]; then
     echo "Download ioncube..."
-    if [ "${TARGET_ARCH}" == "armv7" ]; then
-      src_url=https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_armv7l.tar.gz && Download_src
-    else
-      src_url=https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_${SYS_BIT_d}.tar.gz && Download_src
-    fi
+    src_url=https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_${SYS_BIT_d}.tar.gz && Download_src
   fi
 
   # SourceGuardian
@@ -779,8 +781,13 @@ checkDownload() {
 
   # pecl_redis
   if [ "${pecl_redis}" == '1' ]; then
-    echo "Download pecl_redis..."
-    src_url=https://pecl.php.net/get/redis-${pecl_redis_ver}.tgz && Download_src
+    if [[ "${php_option}" =~ ^[1-4]$ ]]; then
+      echo "Download pecl_redis for php..."
+      src_url=https://pecl.php.net/get/redis-${pecl_redis_oldver}.tgz && Download_src
+    else
+      echo "Download pecl_redis for php 7.x..."
+      src_url=https://pecl.php.net/get/redis-${pecl_redis_ver}.tgz && Download_src
+    fi
   fi
 
   # memcached-server
@@ -807,11 +814,11 @@ checkDownload() {
   if [ "${pecl_memcache}" == '1' ]; then
     if [[ "${php_option}" =~ ^[1-4]$ ]]; then
       echo "Download pecl_memcache for php..."
-      src_url=https://pecl.php.net/get/memcache-${pecl_memcache_ver}.tgz && Download_src
+      src_url=https://pecl.php.net/get/memcache-${pecl_memcache_oldver}.tgz && Download_src
     else
       echo "Download pecl_memcache for php 7.x..."
       # src_url=https://codeload.github.com/websupport-sk/pecl-memcache/zip/php7 && Download_src
-      src_url=${mirrorLink}/pecl-memcache-php7.tgz && Download_src
+      src_url=${mirrorLink}/pecl-memcache-${pecl_memcache_ver}.tar.gz && Download_src
     fi
   fi
 
