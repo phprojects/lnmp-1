@@ -14,8 +14,8 @@ Install_pecl_xdebug() {
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
     PHP_main_ver=${PHP_detail_ver%.*}
-    if [[ "${PHP_main_ver}" =~ ^5.[5-6]$|^7.[0-3]$ ]]; then
-      if [[ "${PHP_main_ver}" =~ ^7.[0-3]$ ]]; then
+    if [[ "${PHP_main_ver}" =~ ^5.[5-6]$|^7.[0-4]$ ]]; then
+      if [[ "${PHP_main_ver}" =~ ^7.[0-4]$ ]]; then
         src_url=https://pecl.php.net/get/xdebug-${xdebug_ver}.tgz && Download_src
         tar xzf xdebug-${xdebug_ver}.tgz
         pushd xdebug-${xdebug_ver} > /dev/null
@@ -49,7 +49,7 @@ EOF
         echo; echo "Webgrind URL: ${CMSG}http://{Public IP}/webgrind ${CEND}"
         rm -rf xdebug-${xdebug_ver} xdebug-${xdebug_oldver}
       else
-        echo "${CFAILURE}PHP xdebug module install failed, Please contact the author! ${CEND}"
+        echo "${CFAILURE}PHP xdebug module install failed, Please contact the author! ${CEND}" && lsb_release -a
       fi
     else
       echo "${CWARNING}Your php ${PHP_detail_ver} does not support xdebug! ${CEND}";

@@ -51,7 +51,7 @@ Install_redis_server() {
     service redis-server start
   else
     rm -rf ${redis_install_dir}
-    echo "${CFAILURE}Redis-server install failed, Please contact the author! ${CEND}"
+    echo "${CFAILURE}Redis-server install failed, Please contact the author! ${CEND}" && lsb_release -a
     kill -9 $$
   fi
   popd > /dev/null
@@ -61,7 +61,7 @@ Install_pecl_redis() {
   if [ -e "${php_install_dir}/bin/phpize" ]; then
     pushd ${oneinstack_dir}/src > /dev/null
     phpExtensionDir=`${php_install_dir}/bin/php-config --extension-dir`
-    if [ "`${php_install_dir}/bin/php-config --version | awk -F. '{print $1}'`" == '7' ]; then
+    if [ "$(${php_install_dir}/bin/php-config --version | awk -F. '{print $1}')" == '7' ]; then
       tar xzf redis-${pecl_redis_ver}.tgz
       pushd redis-${pecl_redis_ver} > /dev/null
     else
@@ -77,7 +77,7 @@ Install_pecl_redis() {
       echo "${CSUCCESS}PHP Redis module installed successfully! ${CEND}"
       rm -rf redis-${pecl_redis_ver} redis-${pecl_redis_oldver}
     else
-      echo "${CFAILURE}PHP Redis module install failed, Please contact the author! ${CEND}"
+      echo "${CFAILURE}PHP Redis module install failed, Please contact the author! ${CEND}" && lsb_release -a
     fi
     popd > /dev/null
   fi

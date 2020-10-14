@@ -58,15 +58,19 @@ Upgrade_DB() {
     [ "${db_flag}" != 'y' ] && read -e -p "Please input upgrade ${DB} Version(example: ${OLD_db_ver}): " NEW_db_ver
     if [ `echo ${NEW_db_ver} | awk -F. '{print $1"."$2}'` == `echo ${OLD_db_ver} | awk -F. '{print $1"."$2}'` ]; then
       if [ "${DB}" == 'MariaDB' ]; then
-        DB_filename=mariadb-${NEW_db_ver}-${GLIBC_FLAG}-${SYS_BIT_b}
-        DB_URL=${DOWN_ADDR}/mariadb-${NEW_db_ver}/bintar-${GLIBC_FLAG}-${SYS_BIT_a}/${DB_filename}.tar.gz
+        DB_filename=mariadb-${NEW_db_ver}-linux-${SYS_BIT_b}
+        DB_URL=${DOWN_ADDR}/mariadb-${NEW_db_ver}/bintar-linux-${SYS_BIT_a}/${DB_filename}.tar.gz
       elif [ "${DB}" == 'Percona' ]; then
         if [[ "`echo ${NEW_db_ver} | awk -F. '{print $1"."$2}'`" =~ ^5.[5-6]$ ]]; then
           perconaVerStr1=$(echo ${NEW_db_ver} | sed "s@-@-rel@")
         else
           perconaVerStr1=${NEW_db_ver}
         fi
-        DB_filename=Percona-Server-${perconaVerStr1}-Linux.${SYS_BIT_b}.${sslLibVer}
+        if [[ "`echo ${NEW_db_ver} | awk -F. '{print $1"."$2}'`" =~ ^8.0$ ]]; then
+           DB_filename=Percona-Server-${perconaVerStr1}-Linux.${SYS_BIT_b}.glibc2.12
+        else
+           DB_filename=Percona-Server-${perconaVerStr1}-Linux.${SYS_BIT_b}.${sslLibVer}
+        fi
         DB_URL=https://www.percona.com/downloads/Percona-Server-`echo ${NEW_db_ver} | awk -F. '{print $1"."$2}'`/Percona-Server-${NEW_db_ver}/binary/tarball/${DB_filename}.tar.gz
       elif [ "${DB}" == 'MySQL' ]; then
         DB_filename=mysql-${NEW_db_ver}-linux-glibc2.12-${SYS_BIT_b}
@@ -85,6 +89,7 @@ Upgrade_DB() {
       break
     else
       echo "${CWARNING}input error! ${CEND}Please only input '${CMSG}${OLD_db_ver%.*}.xx${CEND}'"
+      [ "${db_flag}" == 'y' ] && exit
     fi
   done
 
@@ -113,7 +118,7 @@ Upgrade_DB() {
       ${mariadb_install_dir}/bin/mysql_upgrade -uroot -p${dbrootpwd} >/dev/null 2>&1
       [ $? -eq 0 ] &&  echo "You have ${CMSG}successfully${CEND} upgrade from ${CMSG}${OLD_db_ver}${CEND} to ${CMSG}${NEW_db_ver}${CEND}"
     elif [ "${DB}" == 'Percona' ]; then
-      tar xzf ${DB_filename}.tar.gz
+      tar xzf ./${DB_filename}.tar.gz
       service mysqld stop
       mv ${percona_install_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}
       mv ${percona_data_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}

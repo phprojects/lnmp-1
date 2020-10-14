@@ -59,8 +59,10 @@ if [ ${CentOS_ver} -lt 6 >/dev/null 2>&1 ] || [ ${Debian_ver} -lt 8 >/dev/null 2
   kill -9 $$
 fi
 
-LIBC_YN=$(awk -v A=$(getconf -a | grep GNU_LIBC_VERSION | awk '{print $NF}') -v B=2.14 'BEGIN{print(A>=B)?"0":"1"}')
-[ ${LIBC_YN} == '0' ] && GLIBC_FLAG=linux-glibc_214 || GLIBC_FLAG=linux
+command -v gcc > /dev/null 2>&1 || $PM -y install gcc
+gcc_ver=$(gcc -dumpversion | awk -F. '{print $1}')
+
+[ ${gcc_ver} -lt 5 >/dev/null 2>&1 ] && redis_ver=${redis_oldver}
 
 if uname -m | grep -Eqi "arm|aarch64"; then
   armplatform="y"
@@ -108,6 +110,8 @@ elif [ ${Debian_ver} -ge 9 >/dev/null 2>&1 ] || [ ${Ubuntu_ver} -ge 14 >/dev/nul
   sslLibVer=ssl102
 elif [ ${Fedora_ver} -ge 27 >/dev/null 2>&1 ]; then
   sslLibVer=ssl102
+elif [ "${CentOS_ver}" == '8' ]; then 
+  sslLibVer=ssl1:111
 else
   sslLibVer=unknown
 fi

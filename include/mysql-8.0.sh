@@ -32,24 +32,20 @@ Install_MySQL80() {
     -DFORCE_INSOURCE_BUILD=1 \
     -DSYSCONFDIR=/etc \
     -DWITH_INNOBASE_STORAGE_ENGINE=1 \
-    -DWITH_PARTITION_STORAGE_ENGINE=1 \
     -DWITH_FEDERATED_STORAGE_ENGINE=1 \
     -DWITH_BLACKHOLE_STORAGE_ENGINE=1 \
     -DWITH_MYISAM_STORAGE_ENGINE=1 \
-    -DWITH_EMBEDDED_SERVER=1 \
-    -DENABLE_DTRACE=0 \
     -DENABLED_LOCAL_INFILE=1 \
     -DFORCE_INSOURCE_BUILD=1 \
-    -DDEFAULT_CHARSET=utf8mb4 \
-    -DEXTRA_CHARSETS=all
+    -DDEFAULT_CHARSET=utf8mb4
     make -j ${THREAD}
     make install
     popd
   fi
 
   # backup openssl so
-  [ ! -e "${mysql_install_dir}/lib/lib_bk" ] && mkdir ${mysql_install_dir}/lib/lib_bk
-  /bin/mv ${mysql_install_dir}/lib/{libssl,libcrypto}.so* ${mysql_install_dir}/lib/lib_bk/
+  #[ ! -e "${mysql_install_dir}/lib/lib_bk" ] && mkdir ${mysql_install_dir}/lib/lib_bk
+  #/bin/mv ${mysql_install_dir}/lib/{libssl,libcrypto}.so* ${mysql_install_dir}/lib/lib_bk/
 
   if [ -d "${mysql_install_dir}/support-files" ]; then
     sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' ${mysql_install_dir}/bin/mysqld_safe
@@ -62,7 +58,7 @@ Install_MySQL80() {
     fi
   else
     rm -rf ${mysql_install_dir}
-    echo "${CFAILURE}MySQL install failed, Please contact the author! ${CEND}"
+    echo "${CFAILURE}MySQL install failed, Please contact the author! ${CEND}" && lsb_release -a
     kill -9 $$
   fi
 
@@ -79,6 +75,7 @@ Install_MySQL80() {
 [client]
 port = 3306
 socket = /tmp/mysql.sock
+default-character-set = utf8mb4
 
 [mysql]
 prompt="MySQL [\\d]> "

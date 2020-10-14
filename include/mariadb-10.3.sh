@@ -17,12 +17,12 @@ Install_MariaDB103() {
   mkdir -p ${mariadb_data_dir};chown mysql.mysql -R ${mariadb_data_dir}
 
   if [ "${dbinstallmethod}" == "1" ]; then
-    tar zxf mariadb-${mariadb103_ver}-${GLIBC_FLAG}-${SYS_BIT_b}.tar.gz
-    mv mariadb-${mariadb103_ver}-*-${SYS_BIT_b}/* ${mariadb_install_dir}
+    tar zxf mariadb-${mariadb103_ver}-linux-${SYS_BIT_b}.tar.gz
+    mv mariadb-${mariadb103_ver}-linux-${SYS_BIT_b}/* ${mariadb_install_dir}
     sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' ${mariadb_install_dir}/bin/mysqld_safe
     sed -i "s@/usr/local/mysql@${mariadb_install_dir}@g" ${mariadb_install_dir}/bin/mysqld_safe
   elif [ "${dbinstallmethod}" == "2" ]; then
-    boostVersion2=$(echo ${boost_ver} | awk -F. '{print $1"_"$2"_"$3}')
+    boostVersion2=$(echo ${boost_oldver} | awk -F. '{print $1"_"$2"_"$3}')
     tar xzf boost_${boostVersion2}.tar.gz
     tar xzf mariadb-${mariadb103_ver}.tar.gz
     pushd mariadb-${mariadb103_ver}
@@ -52,13 +52,13 @@ Install_MariaDB103() {
     sed -i "s+^dbrootpwd.*+dbrootpwd='${dbrootpwd}'+" ../options.conf
     echo "${CSUCCESS}MariaDB installed successfully! ${CEND}"
     if [ "${dbinstallmethod}" == "1" ]; then
-      rm -rf mariadb-${mariadb103_ver}-*-${SYS_BIT_b}
+      rm -rf mariadb-${mariadb103_ver}-linux-${SYS_BIT_b}
     elif [ "${dbinstallmethod}" == "2" ]; then
       rm -rf mariadb-${mariadb103_ver} boost_${boostVersion2}
     fi
   else
     rm -rf ${mariadb_install_dir}
-    echo "${CFAILURE}MariaDB install failed, Please contact the author! ${CEND}"
+    echo "${CFAILURE}MariaDB install failed, Please contact the author! ${CEND}" && lsb_release -a
     kill -9 $$
   fi
 
